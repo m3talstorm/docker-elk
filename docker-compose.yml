@@ -1,0 +1,98 @@
+
+version: '2.4'
+
+services:
+
+    # grafana:
+    #     container_name: elk_grafana
+    #     image: grafana/grafana:5.2.2
+    #     restart: unless-stopped
+    #     volumes:
+    #         - grafana_data:/var/lib/grafana
+    #     networks:
+    #         - elk
+    #     ports:
+    #         - 3000:3000
+    #     depends_on:
+    #         elasticsearch:
+    #             condition: service_healthy
+
+    kibana:
+        container_name: elk_kibana
+        # https://www.elastic.co/guide/en/kibana/current/docker.html
+        image: docker.elastic.co/kibana/kibana:6.3.2
+        restart: unless-stopped
+        volumes:
+            - ./kibana/config/:/usr/share/kibana/config:ro
+        ports:
+            - 5601:5601
+        networks:
+            - elk
+        healthcheck:
+            test: ["CMD", "curl", "-A", "'elk:kibana'", "-f", "http://localhost:5601/status"]
+            interval: 5s
+            timeout: 1s
+            retries: 20
+            start_period: 5s
+        depends_on:
+            elasticsearch:
+                condition: service_healthy
+
+    logstash:
+        container_name: elk_logstash
+        # https://www.elastic.co/guide/en/logstash/current/docker.html
+        image: docker.elastic.co/logstash/logstash:6.3.2
+        restart: unless-stopped
+        volumes:
+            - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+            - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+        ports:
+            - 5000:5000
+            - 5044:5044
+        # environment:
+            # Limit how much memory logstash can use
+            # LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+        networks:
+            - elk
+        healthcheck:
+            test: ["CMD", "curl", "-A", "'elk:logstash'", "-f", "http://localhost:9600"]
+            interval: 5s
+            timeout: 1s
+            retries: 20
+            start_period: 5s
+        depends_on:
+            elasticsearch:
+                condition: service_healthy
+
+    elasticsearch:
+        container_name: elk_elasticsearch
+        # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
+        restart: unless-stopped
+        volumes:
+            - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+        ports:
+            - 9200:9200
+            - 9300:9300
+        # environment:
+            # Limit how much memory logstash can use
+            # ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+        networks:
+            - elk
+        healthcheck:
+            test: ["CMD", "curl", "-A", "'elk:elasticsearch'", "-f", "http://localhost:9200"]
+            interval: 5s
+            timeout: 1s
+            retries: 20
+            start_period: 5s
+
+networks:
+
+    elk:
+        name: elk
+        driver: bridge
+
+# volumes:
+#     # Let Docker create a volume on the host to be mapped into the container
+#
+#     grafana_data:
