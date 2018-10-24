@@ -20,7 +20,7 @@ services:
     kibana:
         container_name: elk_kibana
         # https://www.elastic.co/guide/en/kibana/current/docker.html
-        image: docker.elastic.co/kibana/kibana:6.3.2
+        image: docker.elastic.co/kibana/kibana:6.4.2
         restart: unless-stopped
         volumes:
             - ./kibana/config/:/usr/share/kibana/config:ro
@@ -41,7 +41,7 @@ services:
     logstash:
         container_name: elk_logstash
         # https://www.elastic.co/guide/en/logstash/current/docker.html
-        image: docker.elastic.co/logstash/logstash:6.3.2
+        image: docker.elastic.co/logstash/logstash:6.4.2
         restart: unless-stopped
         volumes:
             - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
@@ -67,7 +67,7 @@ services:
     elasticsearch:
         container_name: elk_elasticsearch
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
-        image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.4.2
         restart: unless-stopped
         volumes:
             - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
